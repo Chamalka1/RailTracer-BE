@@ -1,6 +1,6 @@
 const express = require("express");
 const cors = require("cors");
-const mongoose = require("mongodb");
+const mongoose = require("mongoose");
 const router = require("./router");
 
 const app = express();
@@ -14,7 +14,7 @@ const uri =
 
 const connect = async () => {
   try {
-    await MongoClient.connect(uri, {
+    await mongoose.connect(uri, {
       useNewUrlParser: true,
       useUnifiedTopology: true,
     });
@@ -26,31 +26,7 @@ const connect = async () => {
 
 connect();
 
-app.get("/", (req, res) => {
-  res.send("RailTracer");
-});
-
-app.get("/abc", (req, res) => {
-  let data = [
-    {
-      ID: "01",
-      type: "electronic",
-      Weight: "1500 KG",
-      Ishazerdous: "Yes",
-      isbreakable: "yes",
-    },
-    {
-      ID: "02",
-      type: "Wood",
-      Weight: "1300 KG",
-      Ishazerdous: "Yes",
-      isbreakable: "yes",
-    },
-  ];
-  res.send(data);
-});
-
-app.use("/api", router);
+app.use("/api/v1", router);
 
 app.listen(PORT, () => {
   console.log(`RailTracer is running on ${PORT}`);
