@@ -1,7 +1,7 @@
 const express = require("express");
 const cors = require("cors");
 const mongoose = require("mongoose");
-const router = require("./router");
+const userRouter = require("./routes/userRouter");
 
 const app = express();
 app.use(cors());
@@ -26,7 +26,7 @@ const connect = async () => {
 
 connect();
 
-app.use("/api/v1", router);
+app.use("/api/v1/users", userRouter);
 
 app.listen(PORT, () => {
   console.log(`RailTracer is running on ${PORT}`);
