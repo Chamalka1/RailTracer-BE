@@ -1,8 +1,7 @@
-const user = require("../models/UserModel");
+const User = require("../models/UserModel");
 
-const getUser = (req, res, next) => {
-  user
-    .find()
+const getUsers = (req, res, next) => {
+  User.find()
     .then((response) => {
       res.json({ response });
     })
@@ -12,9 +11,12 @@ const getUser = (req, res, next) => {
 };
 
 const addUser = (req, res, next) => {
-  const newUser = new user({
-    id: req.body.id,
+  const newUser = new User({
+    nic: req.body.nic,
     name: req.body.name,
+    role: req.body.role,
+    phoneNumber: req.body.phoneNumber,
+    email: req.body.email,
   });
 
   newUser
@@ -28,9 +30,16 @@ const addUser = (req, res, next) => {
 };
 
 const updateUser = (req, res, next) => {
-  const { id, name } = req.body;
-  user
-    .updateOne({ id: id }, { $set: { name: name } })
+  const { nic, name, role, phoneNumber, email } = req.body;
+  User.findByIdAndUpdate(id, {
+    $set: {
+      nic: nic,
+      name: name,
+      role: role,
+      phoneNumber: phoneNumber,
+      email: email,
+    },
+  })
     .then((response) => {
       res.json({ response });
     })
@@ -40,9 +49,8 @@ const updateUser = (req, res, next) => {
 };
 
 const deleteUser = (req, res, next) => {
-  const id = req.body.id;
-  user
-    .deleteOne({ id: id })
+  const nic = req.body.nic;
+  User.deleteOne({ nic: nic })
     .then((response) => {
       res.json({ response });
     })
@@ -51,7 +59,7 @@ const deleteUser = (req, res, next) => {
     });
 };
 
-exports.getUser = getUser;
+exports.getUsers = getUsers;
 exports.addUser = addUser;
 exports.updateUser = updateUser;
 exports.deleteUser = deleteUser;
