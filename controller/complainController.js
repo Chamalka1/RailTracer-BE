@@ -1,8 +1,7 @@
 const Complain = require("../models/ComplainModel");
 
-const getComplain = (req, res, next) => {
-  complain
-    .find()
+const getComplains = (req, res, next) => {
+  Complain.find()
     .then((response) => {
       res.json({ response });
     })
@@ -12,13 +11,13 @@ const getComplain = (req, res, next) => {
 };
 
 const addComplain = (req, res, next) => {
-  const newComplain = new complain({
-    nic: req.body.nic,
-    complainerName: req.body.complainerName,
-    date: req.body,
-    date,
+  const newComplain = new Complain({
+    user: req.body.user,
     packageId: req.body.packageId,
-    description: req.body.description,
+    complainerCategory: req.complainerCategory,
+    discription: req.body.discription,
+    complainStatus: req.body.complainStatus,
+    logs: req.body.logs,
   });
 
   newComplain
@@ -32,20 +31,25 @@ const addComplain = (req, res, next) => {
 };
 
 const updateComplain = (req, res, next) => {
-  const { nic, complainerName, date, packageId, description } = req.body;
-  complain
-    .updateOne(
-      { id: id },
-      {
-        $set: {
-          nic: nic,
-          complainerName: complainerName,
-          date: date,
-          packageId: packageId,
-          description: description,
-        },
-      }
-    )
+  const {
+    id,
+    user,
+    packageId,
+    complainerCategory,
+    discription,
+    complainStatus,
+    logs,
+  } = req.body;
+  Complain.findByIdAndUpdate(id, {
+    $set: {
+      user: user,
+      packageId: packageId,
+      complainerCategory: complainerCategory,
+      discription: discription,
+      complainStatus: complainStatus,
+      logs: logs,
+    },
+  })
     .then((response) => {
       res.json({ response });
     })
@@ -58,7 +62,7 @@ const deleteComplain = (req, res, next) => {
   const id = req.body.id;
 
   package
-    .deleteOne({ id: id })
+    .deleteOne({ _id: id })
     .then((response) => {
       res.json({ response });
     })
@@ -67,8 +71,7 @@ const deleteComplain = (req, res, next) => {
     });
 };
 
-exports.getComplain = getComplain;
+exports.getComplains = getComplains;
 exports.addComplain = addComplain;
 exports.updateComplain = updateComplain;
-exports.deletecomplain = this.deletecomplain;
-S;
+exports.deletecomplain = deleteComplain;
