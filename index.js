@@ -5,6 +5,7 @@ const userRouter = require("./routers/userRouter");
 const packageRouter = require("./routers/pacakageRouter");
 const stationRouter = require("./routers/stationRouter");
 const complainRouter = require("./routers/complainRouter");
+const trainRouter = require("./routers/trainRouter");
 
 const app = express();
 app.use(cors());
@@ -13,7 +14,7 @@ app.use(express.json());
 const PORT = 5000;
 
 const uri =
-  "mongodb+srv://rashmiprabhath:RailTracer654@railtracer.83jff.mongodb.net/?retryWrites=true&w=majority&appName=RailTracer";
+  "mongodb+srv://RailTracer:eVrja2iKvdmK2atm@railtracer.9jr7v.mongodb.net/?retryWrites=true&w=majority&appName=RailTracer";
 
 const connect = async () => {
   try {
@@ -33,6 +34,7 @@ app.use("/api/v1/users", userRouter);
 app.use("/api/v1/packages", packageRouter);
 app.use("/api/v1/stations", stationRouter);
 app.use("/api/v1/complains", complainRouter);
+app.use("/api/v1/trains", trainRouter);
 
 app.listen(PORT, () => {
   console.log(`RailTracer is running on ${PORT}`);
