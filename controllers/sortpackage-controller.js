@@ -1,35 +1,42 @@
-const { response } = require("express");
-const user = require("../models/Sortpackagemodel");
+const ParcelSort = require("../models/Sortpackagemodel");
 
+// Fetch all sorted parcels
 const getSortpackage = (req, res, next) => {
-  Parcelsort.find()
-  .then((response) => {
-    res.json({response});
-  })
-  .catch ((error) => {
-    res.json({ error});
-  });
+  ParcelSort.find()
+    .then((response) => {
+      res.json({ response });
+    })
+    .catch((error) => {
+      res.json({ error });
+    });
 };
 
+// Add a new sorted parcel
 const addSortpackage = (req, res, next) => {
   const newParcel = new ParcelSort({
     description: req.body.description,
     to: req.body.to,
     from: req.body.from,
+    warehouseName: req.body.warehouseName,
     trainSchedule: req.body.trainSchedule || "",
     priority: req.body.priority || "Low",
     status: req.body.status || "Pending",
     size: req.body.size || "Medium",
+    stationName: req.body.stationName,
+    arrivedTime: req.body.arrivedTime || "",
+    dispatchedTime: req.body.dispatchedTime || "",
+    damageStatus: req.body.damageStatus || "Not Damaged",
   });
 
   newParcel
     .save()
-    .then((response) => res.json({ message: " Parcel sorted successfully! ", response }))
+    .then((response) => res.json({ message: "Parcel sorted successfully!", response }))
     .catch((error) => res.json({ error }));
 };
 
+// Update a sorted parcel
 const updateSortpackage = (req, res, next) => {
-  const { id, trainSchedule, priority, status, size } = req.body;
+  const { id, trainSchedule, priority, status, size, arrivedTime, dispatchedTime, damageStatus } = req.body;
 
   ParcelSort.updateOne(
     { _id: id },
@@ -39,6 +46,9 @@ const updateSortpackage = (req, res, next) => {
         priority,
         status,
         size,
+        arrivedTime,
+        dispatchedTime,
+        damageStatus,
       },
     }
   )
@@ -46,17 +56,18 @@ const updateSortpackage = (req, res, next) => {
     .catch((error) => res.json({ error }));
 };
 
-//Deleting the sorted item
+// Delete a sorted parcel
 const deleteSortpackage = (req, res, next) => {
   const id = req.body.id;
 
-  ParcelSort.deleteSortpackage({_id: id})
-  .then(() => res.json({ message: "Sorted parcel deleted successfully!"}))
-  .catch((error) => res.json({ error }));
+  ParcelSort.deleteOne({ _id: id })
+    .then(() => res.json({ message: "Sorted parcel deleted successfully!" }))
+    .catch((error) => res.json({ error }));
 };
 
-
-exports.getSortpackage = getSortpackage;
-exports.addSortpackage = addSortpackage;
-exports.updateSortpackage = updateSortpackage;
-exports.deleteSortpackage = deleteSortpackage;
+module.exports = {
+  getSortpackage,
+  addSortpackage,
+  updateSortpackage,
+  deleteSortpackage,
+};
