@@ -4,6 +4,7 @@ const control = require("./controllers/user-controller");
 const control = require("../controller/reports-controller");
 const complainController = require('../controller/complain-controller');
 
+
 router.get("/users", control.getUser);
 router.post("/users", control.addUser);
 router.put("/users", control.updateUser);
@@ -16,6 +17,8 @@ router.put("/sortpackages", control.updateSortpackage);
 router.delete("/sortpackages", control.deleteSortpackage);
 
 router.get('/generate-report', complainController.generateReport);
+
+
 
 /*// Fetch parcels
 fetch("http://localhost:5000/api/sortpackages")
