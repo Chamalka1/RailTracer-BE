@@ -1,59 +1,55 @@
 const express = require("express");
 const router = express.Router();
-const Parcel = require("../models/parcel-model"); // Import Parcel model
+const Parcel = require("../models/Reportsmodel");
+const ParcelSort = require("../models/Sortpackagemodel");
 
-const Parcel = require("../models/parcelModel"); // Import Parcel model
-const LogisticsManager = require("../models/logisticsManagerModel"); // Import Logistics Manager model (if applicable)
-
-// Generate a report of sorted parcels
-exports.generateReport = async (req, res) => {
+const generateReport = async (req, res) => {
   try {
-    // Fetch all sorted parcels
-    const sortedParcels = await Parcel.find({ status: "Sorted" });
-
-    if (sortedParcels.length === 0) {
-      return res.status(404).json({ message: "No sorted parcels found for reporting." });
+    const { from, to } = req.query;
+  let filter = {};
+    if (from && to) {
+      filter.arrivedTime = {
+        $gte: new Date(from),
+        $lte: new Date(to),
+      };
     }
 
-    // Structure the report data
-    const reportData = sortedParcels.map(parcel => ({
-      parcelId: parcel.parcelId,
-      description: parcel.description,
-      to: parcel.to,
-      from: parcel.from,
-      trainSchedule: parcel.trainSchedule,
-      priority: parcel.priority,
-      status: parcel.status,
-    }));
+    const parcels = await ParcelSort.find(filter);
 
-    res.status(200).json({
-      message: "Report generated successfully",
-      report: reportData,
+    // Group parcels by station and warehouse
+    const reportMap = {};
+
+    parcels.forEach(parcel => {
+      const key = `${parcel.stationName}__${parcel.warehouseName}`;
+      if (!reportMap[key]) {
+        reportMap[key] = {
+          stationName: parcel.stationName,
+          warehouseName: parcel.warehouseName,
+          sortedCount: 0,
+          damagedCount: 0,
+        };
+      }
+
+      if (parcel.status === "Sorted") {
+        reportMap[key].sortedCount += 1;
+      }
+
+      if (parcel.damageStatus && parcel.damageStatus !== "Not Damaged") {
+        reportMap[key].damagedCount += 1;
+      }
     });
+
+    const report = Object.values(reportMap);
+
+    res.json({ message: "Report generated", report });
 
   } catch (error) {
     console.error("Error generating report:", error);
-    res.status(500).json({ message: "An error occurred while generating the report." });
+    res.json({ message: "An error occurred while generating the report." });
   }
 };
 
-// Notify the logistics manager
-exports.notifyLogisticsManager = async (req, res) => {
-  try {
-    const logisticsManager = await LogisticsManager.findOne(); // Fetch logistics manager (if there's only one)
-    if (!logisticsManager) {
-      return res.status(404).json({ message: "Logistics Manager not found" });
-    }
+module.exports = {generateReport};
 
-    // Simulated notification (In real-world applications, this could be an email or in-app notification)
-    console.log(`Notification sent to logistics manager: Report of sorted parcels is available.`);
 
-    res.status(200).json({ message: "Notification sent to the logistics manager successfully." });
-
-  } catch (error) {
-    console.error("Error notifying logistics manager:", error);
-    res.status(500).json({ message: "An error occurred while sending the notification." });
-  }
-};
-
-module.exports = router;
+exports.generateReport = generateReport;

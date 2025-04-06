@@ -3,7 +3,7 @@ const router = express.Router();
 const control = require("./controllers/user-controller");
 const control = require("../controller/reports-controller");
 const complainController = require('../controller/complain-controller');
-
+const sortpackagesController = require('../controllers/sortpaackage-controller');
 
 router.get("/users", control.getUser);
 router.post("/users", control.addUser);
@@ -16,6 +16,7 @@ router.post("/sortpackages", control.addSortpackage);
 router.put("/sortpackages", control.updateSortpackage);
 router.delete("/sortpackages", control.deleteSortpackage);
 
+router.get('/generate-report', control.generateReport)
 router.get('/generate-report', complainController.generateReport);
 
 
