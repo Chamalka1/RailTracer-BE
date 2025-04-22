@@ -1,7 +1,7 @@
 const express = require("express");
 const app = express();
 const cors = require("cors");
-const control = require("./controller");
+const control = require("./controllers/userController");
 
 app.use(cors());
 app.use(express.urlencoded({ extended: true }));
@@ -26,6 +26,8 @@ app.delete("/users", (req, res) => {
     res.send(callback);
   });
 });
+
+
 
 
 
