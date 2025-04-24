@@ -3,7 +3,7 @@ const Schema = mongoose.Schema;
 
 const sortpackageSchema = new Schema({
     parcelId: {
-        type: mongoose.Schema.Typres.ObjectId,
+        type: mongoose.Schema.Types.ObjectId,
         ref : 'Parcel',
         requied: true
     },
@@ -12,7 +12,7 @@ const sortpackageSchema = new Schema({
     trainSchedule: { type: String},
     priority: { type: String, enum: ["Low","Medium","High"], default: "Low"},
     status: { type: String, enum: ["Pending", "In Transit", "Dispatched"], default: "Pending"},
-    size: { type: String, enum: ["Small", "Medium", "Large"]},
+    size: { type: String, enum: ["S", "M", "L"]},
     stationName: { type: String, required: true},
     arrivedTime: { type: String, required: true},
     dispatchedTime: { type:String, required: true},
@@ -22,5 +22,5 @@ const sortpackageSchema = new Schema({
     { timestamps: true }
 );
 
-module.exports = mongoose.model("sortpackages", sortpackageSchema);
+module.exports = mongoose.model("Sortpackage", sortpackageSchema);
 

@@ -3,12 +3,12 @@ const Parcel = require('../models/Parcelmodel');
 
 const getSortpackage = (req, res, next) => {
   SortPackage.find()
-  .populate("parcelId")
-  .then((response) => {
-    res.json({ response });
+    .populate("parcelId")
+    .then((response) => {
+       res.json({ response });
   })
   .catch((error) => {
-    res.json({ error });
+    res.status(500).json({ error });
   });
 };
 
@@ -18,12 +18,12 @@ const fetchParcelDetails = async (req, res,next) => {
     res.json({ parcels });
   })
   .catch((error) => {
-    res.json({ error });
+    res.status(500).json({ error });
   });
 };
 
 const addSortpackage = (req, res, next) => {
-  const newSort = new sortpackage ({
+  const newSort = new SortPackage ({
     parcelId: req.body.parcelId,
     warehouseName: req.body.warehouseName,
     trainSchedule: req.body.trainSchedule,
@@ -42,7 +42,7 @@ const addSortpackage = (req, res, next) => {
     res.json({ response });
   })
   .catch((error) => {
-    res.json({ error });
+    res.status(500).json({ error });
   });
 };
 
@@ -59,12 +59,12 @@ const updateSortpackage = (req, res, next) => {
     dispatchedTime: req.body.dispatchedTime,
     damagedStatus: req.body.damagedStatus,
   };
-   SortPackage.findByIdandUpdate(id, { $set: updateDate })
+   SortPackage.findByIdandUpdate(id, { $set: updateData }, {new: true })
    .then((response) => {
     res.json({ response });
    })
    .catch((error) => {
-    res.json({ error });
+    res.status(500).json({ error });
    });
 };
 
@@ -76,7 +76,7 @@ const deleteSortpackage = (req, res, next) => {
     res.json({ response });
   })
   .catch((error) => {
-    res.json({ error });
+    res.status(500).json({ error });
   });
 };
 
