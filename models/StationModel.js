@@ -3,20 +3,35 @@ const Schema = mongoose.Schema;
 
 const stationSchema = new Schema(
   {
-    stationName: String,
-    stationAddress: String,
-    stationContactNo: String,
-    isClosed: { type: Boolean, default: false },
-    adjacentStations: [
+    stationCode: {
+      type: String,
+      required: true,
+      unique: true,
+    },
+    name: {
+      type: String,
+      required: true,
+    },
+    city: {
+      type: String,
+      required: true,
+    },
+    state: {
+      type: String,
+      required: true,
+    },
+    platforms: {
+      type: Number,
+      required: true,
+    },
+    status: {
+      type: String,
+      enum: ["operational", "maintenance", "closed"],
+      default: "operational",
+    },
+    facilities: [
       {
-        stationId: { type: Schema.Types.ObjectId, ref: "Station" },
-        name: String,
-      },
-    ],
-    warehouses: [
-      {
-        warehouseId: { type: Schema.Types.ObjectId, ref: "Warehouse" },
-        name: String,
+        type: String,
       },
     ],
   },
