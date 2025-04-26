@@ -13,7 +13,7 @@ app.use(express.json());
 const PORT = 5000;
 
 const uri =
-  "mongodb+srv://rashmiprabhath:RailTracer654@railtracer.83jff.mongodb.net/?retryWrites=true&w=majority&appName=RailTracer";
+  "mongodb+srv://RailTracer:eVrja2iKvdmK2atm@railtracer.9jr7v.mongodb.net/?retryWrites=true&w=majority&appName=RailTracer";
 
 const connect = async () => {
   try {

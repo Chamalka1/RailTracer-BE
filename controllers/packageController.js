@@ -13,6 +13,8 @@ const getPackages = (req, res, next) => {
 const addPackage = (req, res, next) => {
   const newPackage = new Package({
     weight: req.body.weight,
+    deliverySender: req.body.deliverySender,
+    deliveryReciever: req.body.deliveryReciever,
     from: req.body.from,
     to: req.body.to,
     isUrgent: req.body.isUrgent,
@@ -35,7 +37,16 @@ const addPackage = (req, res, next) => {
 };
 
 const updatePackage = (req, res, next) => {
-  const { id, type, weight, from, to, description, packageStatus } = req.body;
+  const id = req.params.id;
+  const {
+    weight,
+    deliverySender,
+    deliveryReciever,
+    from,
+    to,
+    description,
+    packageStatus,
+  } = req.body;
   Package.findByIdAndUpdate(id, {
     $set: {
       type: type,
@@ -54,7 +65,7 @@ const updatePackage = (req, res, next) => {
 };
 
 const deletePackage = (req, res, next) => {
-  const id = req.body.id;
+  const id = req.params.id;
 
   Package.deleteOne({ _id: id })
     .then((response) => {

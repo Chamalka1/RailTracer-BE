@@ -4,7 +4,7 @@ const packageController = require("../controllers/packageController");
 
 packageRouter.get("/", packageController.getPackages);
 packageRouter.post("/", packageController.addPackage);
-packageRouter.put("/", packageController.updatePackage);
-packageRouter.delete("/", packageController.deletePackage);
+packageRouter.put("/:packageId", packageController.updatePackage);
+packageRouter.delete("/:packageId", packageController.deletePackage);
 
 module.exports = packageRouter;

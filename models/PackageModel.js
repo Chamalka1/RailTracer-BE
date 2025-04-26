@@ -4,6 +4,18 @@ const Schema = mongoose.Schema;
 const packageSchema = new Schema(
   {
     weight: Number,
+    deliverySender: {
+      nic: String,
+      name: String,
+      telephone: String,
+      email: String,
+    },
+    deliveryReciever: {
+      nic: String,
+      name: String,
+      telephone: String,
+      email: String,
+    },
     from: {
       stationId: { type: Schema.Types.ObjectId, ref: "Station" },
       stationName: String,
@@ -16,7 +28,7 @@ const packageSchema = new Schema(
     isHazardous: Boolean,
     isFragile: Boolean,
     currentLocation: { type: Schema.Types.ObjectId },
-    discription: String,
+    description: String,
     packageStatus: {
       type: String,
       enum: ["RECEIVED", "WAREHOUSE", "MOVING", "DELIVERED", "DAMAGED", "LOST"],
