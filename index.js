@@ -2,7 +2,7 @@ const express = require("express");
 const cors = require("cors");
 const mongoose = require("mongoose");
 const userRouter = require("./routers/userRouter");
-const packageRouter = require("./routers/pacakageRouter");
+const packageRouter = require("./routes/parcelRoutes");
 const stationRouter = require("./routers/stationRouter");
 const complainRouter = require("./routers/complainRouter");
 const trainRouter = require("./routers/trainRouter");
@@ -19,7 +19,7 @@ app.use(express.urlencoded({ extended: true }));
 // Routes
 app.use("/api/auth", authRoutes); // Auth routes
 app.use("/api/v1/users", userRouter);
-app.use("/api/v1/packages", packageRouter);
+app.use("/api/v1/parcels", packageRouter);
 app.use("/api/v1/stations", stationRouter);
 app.use("/api/v1/complains", complainRouter);
 app.use("/api/v1/trains", trainRouter);

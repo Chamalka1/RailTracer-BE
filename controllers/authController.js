@@ -1,5 +1,6 @@
 const User = require("../models/user");
 const jwt = require("jsonwebtoken");
+const bcrypt = require("bcryptjs");
 
 const JWT_SECRET = process.env.JWT_SECRET || "your-secret-key";
 
@@ -20,9 +21,9 @@ exports.login = async (req, res) => {
     }
 
     // Update last login
-    user.lastLogin = new Date();
-    await user.save();
-
+    // user.lastLogin = new Date();
+    // await user.save();
+    console.log(user);
     // Generate JWT token
     const token = jwt.sign(
       {
@@ -40,8 +41,8 @@ exports.login = async (req, res) => {
         id: user._id,
         email: user.email,
         role: user.role,
-        firstName: user.firstName,
-        lastName: user.lastName,
+        // firstName: user.firstName,
+        // lastName: user.lastName,
       },
     });
   } catch (error) {
@@ -134,5 +135,43 @@ exports.initializeAdmin = async () => {
     }
   } catch (error) {
     console.error("Error creating admin user:", error);
+  }
+};
+
+// Initialize customer support user
+exports.initializeCustomerSupport = async () => {
+  try {
+    // Check if customer support user exists
+    const existingUser = await User.findOne({
+      email: "support@railtracer.com",
+    });
+
+    if (!existingUser) {
+      await User.create({
+        firstName: "Customer",
+        lastName: "Support",
+        name: "Customer Support",
+        email: "support@railtracer.com",
+        password: "support123",
+        role: "customer-support",
+      });
+      console.log("Customer support user created successfully");
+    }
+  } catch (error) {
+    console.error("Error creating customer support user:", error);
+  }
+};
+
+// Get current user
+exports.getCurrentUser = async (req, res) => {
+  try {
+    const user = await User.findById(req.user.userId).select("-password");
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+    res.json({ user });
+  } catch (error) {
+    console.error("Error in getCurrentUser:", error);
+    res.status(500).json({ message: "Server error" });
   }
 };

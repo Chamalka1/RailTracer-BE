@@ -2,11 +2,14 @@ const mongoose = require("mongoose");
 const bcrypt = require("bcryptjs");
 
 const userSchema = new mongoose.Schema({
+  name: {
+    type: String,
+    required: true,
+  },
   email: {
     type: String,
     required: true,
     unique: true,
-    trim: true,
     lowercase: true,
   },
   password: {
@@ -15,36 +18,37 @@ const userSchema = new mongoose.Schema({
   },
   firstName: {
     type: String,
-    required: true,
+    required: false,
   },
   lastName: {
     type: String,
-    required: true,
+    required: false,
   },
   role: {
     type: String,
+    enum: ["admin", "customer-support", "station-master"],
     required: true,
-    enum: [
-      "admin",
-      "warehouse",
-      "customerSupport",
-      "customerSupportStaff",
-      "logisticOperator",
-      "railwayAdmin",
-    ],
   },
   employeeId: {
     type: String,
-    required: true,
-    unique: true,
+    required: function () {
+      // Only required for admin and station-master roles
+      return ["admin", "station-master"].includes(this.role);
+    },
   },
   department: {
     type: String,
-    required: true,
+    required: function () {
+      // Only required for admin and station-master roles
+      return ["admin", "station-master"].includes(this.role);
+    },
   },
   contactNumber: {
     type: String,
-    required: true,
+    required: function () {
+      // Only required for admin and station-master roles
+      return ["admin", "station-master"].includes(this.role);
+    },
   },
   isActive: {
     type: Boolean,
@@ -61,6 +65,13 @@ const userSchema = new mongoose.Schema({
 
 // Hash password before saving
 userSchema.pre("save", async function (next) {
+  // Set name from firstName and lastName if they exist
+  if (this.isModified("firstName") || this.isModified("lastName")) {
+    if (this.firstName && this.lastName) {
+      this.name = `${this.firstName} ${this.lastName}`;
+    }
+  }
+
   if (!this.isModified("password")) return next();
 
   try {
