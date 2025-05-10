@@ -1,10 +1,21 @@
 const Parcel = require("../models/parcel");
 const { generateTrackingNumber } = require("../utils/trackingUtils");
 const asyncHandler = require("express-async-handler");
+const { validateParcelInput } = require("../utils/validations");
 
 // Accept a new parcel
 exports.acceptParcel = async (req, res) => {
   try {
+    // Validate input
+    const { isValid, errors } = validateParcelInput(req.body);
+    if (!isValid) {
+      return res.status(400).json({
+        success: false,
+        message: "Validation failed",
+        errors
+      });
+    }
+
     const {
       customerName,
       customerPhone,
@@ -29,7 +40,7 @@ exports.acceptParcel = async (req, res) => {
       sourceStation,
       destinationStation,
       trackingNumber,
-      acceptedBy: req.user._id, // From auth middleware
+      acceptedBy: req.user._id,
     });
 
     await parcel.save();
@@ -40,7 +51,7 @@ exports.acceptParcel = async (req, res) => {
     });
   } catch (error) {
     console.error("Error creating parcel:", error);
-    res.status(400).json({
+    res.status(500).json({
       success: false,
       error: error.message || "Failed to create parcel",
     });
@@ -138,55 +149,80 @@ exports.updateParcelStatus = async (req, res) => {
 // @route   PUT /api/parcels/:id
 // @access  Private/CustomerSupport
 exports.updateParcel = asyncHandler(async (req, res) => {
-  const parcel = await Parcel.findById(req.params.id);
+  try {
+    // Validate input
+    const { isValid, errors } = validateParcelInput(req.body, true);
+    if (!isValid) {
+      return res.status(400).json({
+        success: false,
+        message: "Validation failed",
+        errors
+      });
+    }
 
-  if (!parcel) {
-    return res.status(404).json({
+    const parcel = await Parcel.findById(req.params.id);
+    if (!parcel) {
+      return res.status(404).json({
+        success: false,
+        error: "Parcel not found",
+      });
+    }
+
+    // Update only allowed fields
+    const allowedUpdates = [
+      "customerName",
+      "customerEmail",
+      "customerPhone",
+      "weight",
+      "dimensions",
+      "status",
+      "description"
+    ];
+
+    allowedUpdates.forEach(field => {
+      if (req.body[field] !== undefined) {
+        parcel[field] = req.body[field];
+      }
+    });
+
+    const updatedParcel = await parcel.save();
+
+    res.status(200).json({
+      success: true,
+      data: updatedParcel,
+    });
+  } catch (error) {
+    res.status(500).json({
       success: false,
-      error: "Parcel not found",
+      error: error.message || "Failed to update parcel",
     });
   }
-
-  const updatedParcel = await Parcel.findByIdAndUpdate(
-    req.params.id,
-    {
-      customerName: req.body.customerName,
-      customerEmail: req.body.customerEmail,
-      customerPhone: req.body.customerPhone,
-      weight: req.body.weight,
-      dimensions: req.body.dimensions,
-      status: req.body.status,
-      description: req.body.description,
-    },
-    {
-      new: true,
-      runValidators: true,
-    }
-  );
-
-  res.status(200).json({
-    success: true,
-    data: updatedParcel,
-  });
 });
 
 // @desc    Delete parcel
 // @route   DELETE /api/parcels/:id
 // @access  Private/CustomerSupport
 exports.deleteParcel = asyncHandler(async (req, res) => {
-  const parcel = await Parcel.findById(req.params.id);
+  try {
+    const parcel = await Parcel.findById(req.params.id);
 
-  if (!parcel) {
-    return res.status(404).json({
+    if (!parcel) {
+      return res.status(404).json({
+        success: false,
+        error: "Parcel not found",
+      });
+    }
+
+    await parcel.deleteOne();
+
+    res.status(200).json({
+      success: true,
+      message: "Parcel deleted successfully",
+    });
+  } catch (error) {
+    res.status(500).json({
       success: false,
-      error: "Parcel not found",
+      error: error.message || "Failed to delete parcel",
     });
   }
-
-  await parcel.deleteOne();
-
-  res.status(200).json({
-    success: true,
-    data: {},
-  });
 });

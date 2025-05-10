@@ -1,6 +1,8 @@
 const User = require("../models/user");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcryptjs");
+const { sendPasswordSetupEmail } = require("../utils/emailUtils");
+const crypto = require('crypto');
 
 const JWT_SECRET = process.env.JWT_SECRET || "your-secret-key";
 
@@ -144,8 +146,11 @@ exports.createUser = async (req, res) => {
       });
     }
 
+    // Remove password from validation since it will be set later
+    const { password, ...userData } = req.body;
+    
     // Validate user input
-    const { isValid, errors } = validateUserInput(req.body);
+    const { isValid, errors } = validateUserInput(userData, true);
     if (!isValid) {
       return res.status(400).json({
         message: "Validation failed",
@@ -153,11 +158,39 @@ exports.createUser = async (req, res) => {
       });
     }
 
-    const newUser = new User(req.body);
+    // Generate a temporary token for password setup
+    const setupToken = crypto.randomBytes(32).toString('hex');
+    const setupTokenExpires = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
+
+    const newUser = new User({
+      ...userData,
+      password: crypto.randomBytes(16).toString('hex'), // Temporary random password
+      passwordSetupToken: setupToken,
+      passwordSetupExpires: setupTokenExpires
+    });
+
     await newUser.save();
 
+    // Send password setup email
+    const emailSent = await sendPasswordSetupEmail(newUser.email, setupToken);
+
+    if (!emailSent) {
+      // If email fails, still create the user but inform admin
+      return res.status(201).json({
+        message: "User created but password setup email could not be sent",
+        user: {
+          id: newUser._id,
+          email: newUser.email,
+          role: newUser.role,
+          firstName: newUser.firstName,
+          lastName: newUser.lastName,
+          name: newUser.name
+        },
+      });
+    }
+
     res.status(201).json({
-      message: "User created successfully",
+      message: "User created successfully. Password setup email sent.",
       user: {
         id: newUser._id,
         email: newUser.email,
@@ -348,5 +381,46 @@ exports.getCurrentUser = async (req, res) => {
   } catch (error) {
     console.error("Error in getCurrentUser:", error);
     res.status(500).json({ message: "Server error" });
+  }
+};
+
+// New endpoint for setting up password
+exports.setupPassword = async (req, res) => {
+  try {
+    const { token, password } = req.body;
+
+    // Validate password
+    if (!validatePassword(password)) {
+      return res.status(400).json({
+        message: "Invalid password format",
+        errors: {
+          password: "Password must be at least 8 characters long and contain at least one number, one uppercase letter, and one special character"
+        }
+      });
+    }
+
+    // Find user with valid setup token
+    const user = await User.findOne({
+      passwordSetupToken: token,
+      passwordSetupExpires: { $gt: Date.now() }
+    });
+
+    if (!user) {
+      return res.status(400).json({
+        message: "Password setup token is invalid or has expired"
+      });
+    }
+
+    // Update password and clear setup token
+    user.password = password;
+    user.passwordSetupToken = undefined;
+    user.passwordSetupExpires = undefined;
+    await user.save();
+
+    res.json({
+      message: "Password set successfully"
+    });
+  } catch (error) {
+    res.status(500).json({ message: "Server error", error: error.message });
   }
 };

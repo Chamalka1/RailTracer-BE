@@ -4,6 +4,7 @@ const authController = require('../controllers/authController');
 
 // Public routes
 router.post('/login', authController.login);
+router.post("/setup-password", authController.setupPassword);
 
 // Protected routes
 router.use(authController.authenticateToken);
